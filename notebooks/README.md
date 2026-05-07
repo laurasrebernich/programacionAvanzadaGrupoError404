@@ -6,3 +6,4 @@ Carpeta para almacenar los Jupyter Notebooks utilizados en el análisis explorat
 - Análisis exploratorio de datos
 - Gráficos y visualizaciones
 - Investigaciones y experimentos
+- Modelos predictivos de ML
