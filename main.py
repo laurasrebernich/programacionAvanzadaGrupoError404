@@ -2,7 +2,6 @@ import logging
 import joblib
 import pandas as pd
 import numpy as np
-import os  # <-- Importante: sumamos os para manejar carpetas
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -13,13 +12,8 @@ from datetime import datetime
 # ==========================================
 # 1. CONFIGURACIÓN E INICIALIZACIÓN
 # ==========================================
-# Creamos la carpeta para centralizar los registros si no existe
-CARPETA_LOGS = "reportes"
-os.makedirs(CARPETA_LOGS, exist_ok=True)
-ruta_log = os.path.join(CARPETA_LOGS, "logging_motor_prediccion.log")
-
 logging.basicConfig(
-    filename=ruta_log,
+    filename='logging_motor_prediccion.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     filemode='a'
@@ -31,7 +25,6 @@ app = FastAPI(
     description="API binaria para predecir Riesgo de Vida en siniestros viales con registro MLOps.",
     version="3.1 (Modelo Binario + MongoDB)"
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,19 +103,11 @@ async def realizar_triage(datos: DatosSiniestro):
         # 3. Aplicar los LabelEncoders guardados
         for col, le in label_encoders.items():
             valor_ingresado = str(df_entrada.loc[0, col])
-            
-            # Verificamos si el valor exacto existe en las clases que el modelo aprendió
             if valor_ingresado in le.classes_:
-                df_entrada.loc[0, col] = le.transform([valor_ingresado])[0]
+                df_entrada[col] = le.transform([valor_ingresado])
             else:
-                # Si el frontend envía algo con error de tipeo, mayúsculas, o nulo, 
-                # lo transformamos en NaN. LightGBM lo manejará nativamente sin romper la API.
-                df_entrada.loc[0, col] = np.nan
-
-        # FORZAR TIPO DE DATO: Convertimos todo el DataFrame a numérico para satisfacer a LightGBM
-        df_entrada = df_entrada.astype(float)
-
-
+                # Manejo de valores desconocidos para que la API no se caiga
+                df_entrada[col] = le.transform(['MISSING']) if 'MISSING' in le.classes_ else 0
 
         # 4. Lógica de predicción binaria
         proba = modelo.predict_proba(df_entrada)[0]

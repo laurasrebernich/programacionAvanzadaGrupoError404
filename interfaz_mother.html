@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel MOTHER - Triage Operativo</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .header { background-color: #1a252f; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header .badge { background-color: #e74c3c; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        
+        .container { display: flex; gap: 20px; }
+        .panel { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-panel { flex: 2; }
+        .result-panel { flex: 1; display: flex; flex-direction: column; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 12px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
+        input, select { padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 14px; background-color: #fff; }
+        
+        .btn-submit { background-color: #2980b9; color: white; border: none; padding: 15px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.3s; margin-top: 10px;}
+        .btn-submit:hover { background-color: #3498db; }
+        
+        #resultado-box { display: none; margin-top: 20px; border: 2px solid #bdc3c7; border-radius: 8px; padding: 20px; text-align: left; }
+        .header-resultado { text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        
+        #triage-badge { display: inline-block; padding: 10px 25px; border-radius: 30px; color: white; font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+        
+        .triage-MORTAL { background-color: #c0392b; animation: pulse 1.5s infinite; }
+        .triage-GRAVE { background-color: #f39c12; }
+        .triage-LEVE { background-color: #27ae60; }
+        
+        .confianza { font-size: 16px; font-weight: bold; color: #2c3e50; margin-top: 8px;}
+        .nivel-riesgo { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        
+        .hospital-asignado { margin-top: 15px; background: #e8f4f8; padding: 12px; border-radius: 4px; border-left: 5px solid #3498db; font-size: 14px; }
+        
+        .protocolo { margin-top: 15px; font-size: 14px; background: #ecf0f1; padding: 15px; border-radius: 4px; border-left: 5px solid #34495e; }
+        .protocolo ul { margin-top: 8px; padding-left: 20px; margin-bottom: 0; }
+        .protocolo li { margin-bottom: 6px; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>MOTHER</h1>
+            <span style="font-size: 14px; color: #bdc3c7;">Motor Operativo de Triage Hospitalario ante Emergencias y Respuesta</span>
+        </div>
+        <div class="badge">SISTEMA ACTIVO</div>
+    </div>
+
+    <div class="container">
+        <div class="panel form-panel">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">Ingreso de Datos de Campo (911)</h2>
+            
+            <form id="triageForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Rol de Víctima</label>
+                        <select id="rol_victima" onchange="sincronizarPeaton()">
+                            <option value="CONDUCTOR">CONDUCTOR</option>
+                            <option value="PEATON">PEATON</option>
+                            <option value="PASAJERO_ACOMPAÑANTE">PASAJERO/ACOMPAÑANTE</option>
+                            <option value="CICLISTA">CICLISTA</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vehículo Víctima</label>
+                        <select id="modo_desplazamiento_victima">
+                            <option value="AUTO">AUTO</option>
+                            <option value="MOTO">MOTO</option>
+                            <option value="BICICLETA">BICICLETA</option>
+                            <option value="PEATON">PEATON</option>
+                            <option value="CARGAS">CARGAS</option>
+                            <option value="TRANSPORTE PUBLICO">TRANSPORTE PUBLICO</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sexo</label>
+                        <select id="sexo_victima">
+                            <option value="M">Masculino (M)</option>
+                            <option value="F">Femenino (F)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group"><label>Edad</label><input type="number" id="edad_victima" value="35"></div>
+
+                    <div class="form-group">
+                        <label>Franja Horaria</label>
+                        <select id="franja_horaria">
+                            <option value="1. Mañana (6h-12h)">1. Mañana (6h-12h)</option>
+                            <option value="2. Tarde (12h-18h)" selected>2. Tarde (12h-18h)</option>
+                            <option value="3. Noche (18h-24h)">3. Noche (18h-24h)</option>
+                            <option value="4. Madrugada (0h-6h)">4. Madrugada (0h-6h)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Vía</label>
+                        <select id="tipo_de_via_siniestro">
+                            <option value="CALLE">CALLE</option>
+                            <option value="AVENIDA">AVENIDA</option>
+                            <option value="AUTOPISTA">AUTOPISTA</option>
+                            <option value="GENERAL PAZ">GENERAL PAZ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comuna</label>
+                        <select id="comuna_siniestro">
+                            <option value="COMUNA 1">COMUNA 1 (Retiro, San Nicolás, Puerto Madero)</option>
+                            <option value="COMUNA 2">COMUNA 2 (Recoleta)</option>
+                            <option value="COMUNA 3">COMUNA 3 (Balvanera, San Cristóbal)</option>
+                            <option value="COMUNA 4">COMUNA 4 (La Boca, Barracas, Patricios)</option>
+                            <option value="COMUNA 5">COMUNA 5 (Almagro, Boedo)</option>
+                            <option value="COMUNA 6">COMUNA 6 (Caballito)</option>
+                            <option value="COMUNA 7">COMUNA 7 (Flores, Parque Chacabuco)</option>
+                            <option value="COMUNA 8">COMUNA 8 (Villa Soldati, Lugano)</option>
+                            <option value="COMUNA 9">COMUNA 9 (Liniers, Mataderos)</option>
+                            <option value="COMUNA 10">COMUNA 10 (Villa Luro, V. Sarsfield)</option>
+                            <option value="COMUNA 11">COMUNA 11 (V. Devoto, V. del Parque)</option>
+                            <option value="COMUNA 12">COMUNA 12 (Coghlan, Saavedra, V. Urquiza)</option>
+                            <option value="COMUNA 13">COMUNA 13 (Belgrano, Colegiales, Núñez)</option>
+                            <option value="COMUNA 14">COMUNA 14 (Palermo)</option>
+                            <option value="COMUNA 15">COMUNA 15 (Chacarita, V. Crespo, Paternal)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contraparte</label>
+                        <select id="contraparte_siniestro">
+                            <option value="AUTO">AUTO</option>
+                            <option value="MOTO">MOTO</option>
+                            <option value="OBJETO FIJO">OBJETO FIJO</option>
+                            <option value="CARGAS">CARGAS</option>
+                            <option value="TRANSPORTE PUBLICO">TRANSPORTE PUBLICO</option>
+                            <option value="PEATON">PEATON</option>
+                            <option value="BICICLETA">BICICLETA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group"><label>Año</label><input type="number" id="anio_siniestro" value="2024"></div>
+                    <div class="form-group"><label>Mes</label><input type="number" id="mes_siniestro" value="5" min="1" max="12"></div>
+                    <div class="form-group"><label>Día</label><input type="number" id="dia_siniestro" value="15" min="1" max="31"></div>
+                </div>
+                <button type="submit" class="btn-submit">EJECUTAR MOTOR PREDICTIVO</button>
+            </form>
+        </div>
+
+        <div class="panel result-panel">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">Evaluación Algorítmica</h2>
+            <div style="text-align: center; color: #7f8c8d; margin-top: 50px;" id="waiting-text">Seleccione parámetros y ejecute...</div>
+            
+            <div id="resultado-box">
+                <div class="header-resultado">
+                    <div id="triage-badge"></div>
+                    <div class="nivel-riesgo" id="nivel-riesgo-text"></div>
+                    <div class="confianza" id="confianza-text"></div>
+                </div>
+                
+                <div class="hospital-asignado">
+                    <strong>🏥 Hospital Base Sugerido:</strong><br>
+                    <span id="hospital-text" style="font-size: 16px; font-weight: bold; color: #2980b9;"></span>
+                </div>
+
+                <div id="protocolo-container" class="protocolo">
+                    <strong>📋 PROTOCOLO DE RESPUESTA:</strong>
+                    <ul id="protocolo-lista"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mejora visual: Si el usuario selecciona "PEATON" en Rol, forzamos Vehículo a "PEATON" en la pantalla
+        function sincronizarPeaton() {
+            const rol = document.getElementById('rol_victima').value;
+            const vehiculoSelect = document.getElementById('modo_desplazamiento_victima');
+            if (rol === 'PEATON') {
+                vehiculoSelect.value = 'PEATON';
+                vehiculoSelect.style.backgroundColor = '#ecf0f1'; // Color gris para indicar que está autoseleccionado
+            } else {
+                vehiculoSelect.style.backgroundColor = '#fff';
+            }
+        }
+
+        const hospitalesCABA = {
+            "COMUNA 1": "Hospital Argerich",
+            "COMUNA 2": "Hospital Fernández",
+            "COMUNA 3": "Hospital Ramos Mejía",
+            "COMUNA 4": "Hospital Penna",
+            "COMUNA 5": "Hospital Durand",
+            "COMUNA 6": "Hospital Durand",
+            "COMUNA 7": "Hospital Piñero",
+            "COMUNA 8": "Hospital Santojanni",
+            "COMUNA 9": "Hospital Santojanni",
+            "COMUNA 10": "Hospital Vélez Sarsfield",
+            "COMUNA 11": "Hospital Zubizarreta",
+            "COMUNA 12": "Hospital Pirovano",
+            "COMUNA 13": "Hospital Pirovano",
+            "COMUNA 14": "Hospital Fernández",
+            "COMUNA 15": "Hospital Tornú"
+        };
+
+        const protocolosOperativos = {
+            "GRAVE": `
+                <li><strong>🚑 Despacho:</strong> Ambulancia de soporte vital avanzado (Prioridad 1).</li>
+                <li><strong>📞 Contención:</strong> Instruir al denunciante que no movilice a la víctima (riesgo cervical).</li>
+                <li><strong>🩺 Monitoreo:</strong> Mantener al operador en línea evaluando si la víctima pierde el conocimiento.</li>
+                <li><strong>🏥 Coordinación:</strong> Aviso de guardia a hospital zonal por trauma severo.</li>
+            `
+        };
+
+        document.getElementById('triageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 1. Limpieza y preparación de variables geográficas
+            const comunaSeleccionada = document.getElementById('comuna_siniestro').value.split(" (")[0];
+            const tipoViaSeleccionada = document.getElementById('tipo_de_via_siniestro').value;
+            
+            // 2. Lógica Restrictiva e Inteligencia del Formulario
+            const rolSeleccionado = document.getElementById('rol_victima').value;
+            let vehiculoSeleccionado = document.getElementById('modo_desplazamiento_victima').value;
+            
+            if (rolSeleccionado === "PEATON") {
+                vehiculoSeleccionado = "PEATON";
+            }
+            
+            const contraparteSeleccionada = document.getElementById('contraparte_siniestro').value;
+
+            // ==========================================
+            // GUARDRAIL: REGLA DE NEGOCIO (Filtro de Sentido Común)
+            // ==========================================
+            if (vehiculoSeleccionado === "PEATON" && contraparteSeleccionada === "PEATON") {
+                alert("⛔ REGLA DE NEGOCIO: Un incidente entre dos peatones en la vía pública no se clasifica como siniestro vial para el despacho del SAME. Redirigir llamada a policía o asistencia médica regular.");
+                return; // Detiene la ejecución del modelo
+            }
+            
+            // Auto-cálculo de la variable oculta "participantes_siniestro"
+            const participantesCalculado = vehiculoSeleccionado + "-" + contraparteSeleccionada;
+
+            // 3. Empaquetado del JSON exacto que espera FastAPI
+            const payload = {
+                rol_victima: rolSeleccionado,
+                modo_desplazamiento_victima: vehiculoSeleccionado,
+                sexo_victima: document.getElementById('sexo_victima').value,
+                edad_victima: parseFloat(document.getElementById('edad_victima').value),
+                franja_horaria: document.getElementById('franja_horaria').value,
+                tipo_de_via_siniestro: tipoViaSeleccionada,
+                comuna_siniestro: comunaSeleccionada,
+                contraparte_siniestro: contraparteSeleccionada,
+                participantes_siniestro: participantesCalculado,
+                anio_siniestro: parseInt(document.getElementById('anio_siniestro').value),
+                mes_siniestro: parseInt(document.getElementById('mes_siniestro').value),
+                dia_siniestro: parseInt(document.getElementById('dia_siniestro').value)
+            };
+
+            try {
+                // Envío de petición al backend
+                const response = await fetch('http://127.0.0.1:8000/predecir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                // Ocultar texto de carga si existe
+                const waitingText = document.getElementById('waiting-text');
+                if (waitingText) waitingText.style.display = 'none';
+                
+                // Elementos de la interfaz a modificar
+                const resultBox = document.getElementById('resultado-box');
+                const badge = document.getElementById('triage-badge');
+                const protocoloContainer = document.getElementById('protocolo-container');
+                const nivelRiesgo = document.getElementById('nivel-riesgo-text');
+                const confianzaText = document.getElementById('confianza-text');
+                
+                resultBox.style.display = 'block';
+
+                // LÓGICA BINARIA: CÓDIGO ROJO vs CÓDIGO VERDE
+                if(data.triage_sugerido === 'MORTAL') {
+                    // ALARMA MÁXIMA
+                    badge.className = 'triage-MORTAL';
+                    badge.innerText = 'CÓDIGO ROJO - RIESGO DE VIDA';
+                    resultBox.style.borderColor = '#c0392b';
+                    resultBox.style.backgroundColor = '#fdedec';
+                    nivelRiesgo.innerText = "ESTADO: RIESGO CRÍTICO DE FATALIDAD";
+                    nivelRiesgo.style.color = '#c0392b';
+                    
+                    confianzaText.innerHTML = `⚠️ El motor analítico detecta riesgo de vida con un <strong>${data.confianza_prediccion_porcentaje}%</strong> de probabilidad. <br><small>(Umbral de disparo técnico: ${data.detalles_tecnicos.umbral_mortal_usado * 100}%)</small>`;
+
+                    // Lógica dinámica de despacho según tipo de vía
+                    let protocoloRojo = "";
+                    if(tipoViaSeleccionada === "AUTOPISTA") {
+                        protocoloRojo += `<li><strong>🚁 Despacho Inmediato:</strong> Unidad de Terapia Intensiva Móvil (UTIM) y <strong>Helicóptero Sanitario (SAME Aéreo)</strong>.</li>`;
+                    } else {
+                        protocoloRojo += `<li><strong>🚑 Despacho Inmediato:</strong> Unidad de Terapia Intensiva Móvil (UTIM).</li>`;
+                    }
+                    protocoloRojo += `
+                        <li><strong>🚒 Rescate:</strong> Alerta automática a Bomberos (probabilidad de víctima atrapada).</li>
+                        <li><strong>🏥 Alerta Roja:</strong> Pre-notificar al Shock Room del hospital de destino.</li>
+                        <li><strong>🚓 Logística:</strong> Desplazamiento de Policía de la Ciudad para corte total.</li>
+                    `;
+                    document.getElementById('protocolo-lista').innerHTML = protocoloRojo;
+                    protocoloContainer.style.display = 'block';
+
+                } else {
+                    // ESTADO BASAL / LEVE
+                    badge.className = 'triage-LEVE';
+                    badge.innerText = 'CÓDIGO VERDE - ESTABILIZADO';
+                    resultBox.style.borderColor = '#27ae60';
+                    resultBox.style.backgroundColor = '#eafaf1';
+                    nivelRiesgo.innerText = "ESTADO: RIESGO BASAL";
+                    nivelRiesgo.style.color = '#27ae60';
+                    
+                    confianzaText.innerHTML = `✅ Cinemática de impacto de baja severidad. <br>Probabilidad de fatalidad: <strong>${data.confianza_prediccion_porcentaje}%</strong>.`;
+                    
+                    document.getElementById('protocolo-lista').innerHTML = data.protocolo_respuesta;
+                    protocoloContainer.style.display = 'block';
+                }
+                
+                // Asignación de Hospital base
+                const hospital = hospitalesCABA[comunaSeleccionada] || "Unidad Base Central SAME";
+                document.getElementById('hospital-text').innerText = hospital + " (" + comunaSeleccionada + ")";
+
+            } catch (error) {
+                alert("Error de conexión con el Cerebro MOTHER. Asegúrate de que Uvicorn esté corriendo (uvicorn main:app --reload).");
+            }
+        });
+    </script>
+</body>
+</html>
