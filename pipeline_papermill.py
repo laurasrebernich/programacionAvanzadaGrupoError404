@@ -6,11 +6,17 @@ import logging
 # ==========================================
 # CONFIGURACIÓN DEL LOGGER (Centro de Control)
 # ==========================================
+# 1. Creamos/Verificamos la carpeta centralizada de reportes
+CARPETA_LOGS = Path("reportes")
+CARPETA_LOGS.mkdir(exist_ok=True)
+ruta_log = CARPETA_LOGS / "logging_reentrenamiento.log"
+
+# 2. Configuramos el logger apuntando a esa nueva ruta
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("logging_reentrenamiento.log", encoding='utf-8'),
+        logging.FileHandler(ruta_log, encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
