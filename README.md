@@ -41,7 +41,7 @@ MOTHER/
 ├── data/                      
 │   ├── processed/             
 │   └── raw/                   
-├── inputs/                    
+├── pipeline/                    
 ├── models/                    
 ├── assets/                    
 ├── notebooks/                 
@@ -63,7 +63,7 @@ MOTHER/
 
 * **`auditoria_modelos/`**: Almacena los reportes inmutables (`.ipynb` ejecutados) generados automáticamente por Papermill cada vez que se reentrena el modelo.
 * **`data/`**: Contiene los conjuntos de datos. Se subdivide en `raw/` (archivos crudos originales del gobierno) y `processed/` (datasets limpios listos para el modelo). Los archivos CSV grandes están ignorados en el `.gitignore`.
-* **`inputs/`**: Contiene el Cuaderno Jupyter maestro parametrizado (`3_modelado_evaluacion.ipynb`) que utiliza Papermill como plantilla para ejecutar los reentrenamientos de forma automatizada.
+* **`pipeline/`**: Contiene el Cuaderno Jupyter maestro parametrizado (`3_modelado_evaluacion.ipynb`) que utiliza Papermill como plantilla para ejecutar los reentrenamientos de forma automatizada.
 * **`models/`**: Directorio donde se guardan los artefactos binarios (`.pkl`) empaquetados por el pipeline, listos para ser consumidos por la API.
 * **`assets/`**: Recursos visuales del proyecto, como diagramas de arquitectura, logotipos y capturas de pantalla de la interfaz de usuario.
 * **`notebooks/`**: Cuadernos de Jupyter utilizados para el Análisis Exploratorio de Datos (EDA) inicial, limpieza y pruebas de concepto.
