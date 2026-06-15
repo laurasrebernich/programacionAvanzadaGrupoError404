@@ -45,7 +45,7 @@ MOTHER/
 ├── models/                    
 ├── assets/                    
 ├── notebooks/                 
-├── scripts/                   
+├── reportes/                   
 ├── venv/                      
 ├── .gitignore                 
 ├── api_mother.log               
@@ -69,7 +69,7 @@ MOTHER/
 * **`notebooks/`**: Cuadernos de Jupyter utilizados para el Análisis Exploratorio de Datos (EDA) inicial, limpieza y pruebas de concepto.
 * **`scripts/`**: Módulos de Python con funciones auxiliares y utilidades reutilizables de código para mantener limpio el repositorio.
 * **Archivos Raíz (`.py`, `.html`, `.log`)**: Los scripts principales de ejecución, incluyendo el servidor backend (`main.py`), el orquestador (`pipeline_papermill.py`), el frontend (`interfaz_mother.html`) y los archivos de registros de eventos históricos del ecosistema.
-
+* **`reportes/`**: Carpeta que almacena los reportes del logging que generan los archivos del pipeline, la interfaz visual junto al archivo main.py, y el reentrenamiento utilizando papermill.
 ---
 
 ## ⚙️ Guía de Instalación y Despliegue Local
